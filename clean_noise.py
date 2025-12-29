@@ -1,22 +1,9 @@
 import os
-from pathlib import Path
-import logging
-
-# --- CONFIGURATION ---
-# Mettez ici le même chemin que dans ingest_auto_crawl.py
-OUTPUT_DIR = Path(r"G:\Mon Drive\NotebookLM\NotebookLM_Sources")
-
-# Mot-clés dans les noms de fichiers ou URLs qui indiquent du "bruit"
-NOISE_KEYWORDS = [
-    "latest_news", "search_result", "label_", "page_", "tag_", 
-    "category_", "author_", "archive", "facebook", "twitter", 
-    "linkedin", "reddit", "signup", "login", "rss_xml", 
-    "javascript", "void_0", "uncategorized_misc", "newsletter"
-]
+from config import OUTPUT_DIR, NOISE_KEYWORDS
+from utils import setup_logging
 
 # --- LOGGING ---
-logging.basicConfig(level=logging.INFO, format='%(message)s')
-logger = logging.getLogger()
+logger = setup_logging("clean_noise")
 
 def is_noise(file_path):
     """Détermine si un fichier est du bruit basé sur son nom ou son contenu."""
@@ -70,7 +57,7 @@ def clean_noise():
     deleted_count = 0
     
     if total_noise < 30:
-        logger.info("\n� Validation un par un (< 30 fichiers) :")
+        logger.info("\n Validation un par un (< 30 fichiers) :")
         for file_path, reason in noisy_files:
             print(f"\n📄 {file_path.name}")
             print(f"   ↳ Raison : {reason}")
@@ -85,7 +72,7 @@ def clean_noise():
             else:
                 print("   conservé.")
     else:
-        logger.info("\n� Validation par paquets de 5 (>= 30 fichiers) :")
+        logger.info("\n Validation par paquets de 5 (>= 30 fichiers) :")
         # Process in chunks of 5
         for i in range(0, len(noisy_files), 5):
             batch = noisy_files[i:i+5]

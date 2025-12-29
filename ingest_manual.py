@@ -2,85 +2,18 @@ import asyncio
 import logging
 import re
 import sys
-from datetime import datetime
-from pathlib import Path
-from dateparser import parse
-from playwright.async_api import async_playwright
 import trafilatura
+from playwright.async_api import async_playwright
 
-# --- CONFIGURATION (Identique au crawler auto) ---
-OUTPUT_DIR = Path(r"G:\Mon Drive\NotebookLM\NotebookLM_Sources")
-
-CATEGORIES = {
-    "Generative AI": {
-        "LLMs": ["llm", "large language model", "gpt", "gemini", "claude", "llama", "chatgpt", "bard", "mistral"],
-        "RAG": ["rag", "retrieval augmented", "vector database", "embedding", "context window"],
-        "Computer Vision": ["diffusion model", "image generation", "video generation", "midjourney", "dall-e", "stable diffusion"],
-        "Audio": ["text-to-speech", "audio generation", "musicgen", "whisper"]
-    },
-    "Infrastructure": {
-        "Hardware": ["gpu", "tpu", "h100", "accelerator", "nvidia", "cuda", "inference"],
-        "MLOps": ["mlops", "pipeline", "serving", "deployment", "monitoring", "kubernetes", "docker"]
-    },
-    "Deep Learning": {
-        "Theory": ["transformer", "attention mechanism", "loss function", "optimization", "backpropagation", "neural network"],
-        "Reinforcement Learning": ["rlhf", "ppo", "q-learning", "agent", "reinforcement learning"]
-    },
-    "Agentic AI": {
-        "Agents": ["autonomous agent", "agentic", "auto-gpt", "babyagi", "crewai", "langgraph", "autogen", "agent framework"],
-        "Tools": ["tool use", "function calling", "mcp", "model context protocol"]
-    },
-    "Robotics": {
-        "Physical AI": ["robotics", "humanoid", "optimus", "figure", "boston dynamics", "physical ai", "embodied ai", "manipulation"]
-    },
-    "General_AI_News": {
-        "News": ["startup", "funding", "regulation", "policy", "ethics", "announcement"]
-    }
-}
-
-from urllib.parse import urlparse
+# Import from our new modules
+from config import OUTPUT_DIR
+from utils import (
+    setup_logging, get_site_name, slugify, normalize_date, 
+    classify_content
+)
 
 # --- LOGGING ---
-logging.basicConfig(level=logging.INFO, format='%(message)s')
-logger = logging.getLogger(__name__)
-
-# --- HELPERS (Duplicated for standalone usage) ---
-def get_site_name(url):
-    """Extracts a short, readable site name from the URL."""
-    try:
-        netloc = urlparse(url).netloc.lower().replace("www.", "")
-        if "openai" in netloc: return "openai"
-        if "google" in netloc: return "google_research"
-        if "meta" in netloc: return "meta_ai"
-        if "anthropic" in netloc: return "anthropic"
-        if "nvidia" in netloc: return "nvidia"
-        if "amazon" in netloc or "aws" in netloc: return "aws"
-        if "huggingface" in netloc: return "huggingface"
-        return netloc.split('.')[0]
-    except:
-        return "web"
-
-def slugify(text):
-    if not text: return "sans_titre"
-    return re.sub(r'[^a-z0-9]+', '_', text.lower()).strip('_')
-
-def normalize_date(raw_date):
-    if not raw_date: return None
-    try:
-        parsed = parse(str(raw_date))
-        return parsed.strftime("%Y-%m-%d") if parsed else None
-    except: return None
-
-def classify_content(content):
-    content_lower = content.lower()
-    scores = {}
-    for cat, subcats in CATEGORIES.items():
-        for subcat, keywords in subcats.items():
-            count = sum(content_lower.count(k) for k in keywords)
-            if count > 0: scores[(cat, subcat)] = count
-    
-    if not scores: return "Uncategorized", "Misc"
-    return max(scores, key=scores.get)
+logger = setup_logging("manual_ingest")
 
 # --- CORE LOGIC ---
 async def process_single_url(url):
