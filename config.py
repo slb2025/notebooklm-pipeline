@@ -3,7 +3,7 @@ from pathlib import Path
 # --- PATHS ---
 BASE_DIR = Path(__file__).parent
 URLS_FILE = BASE_DIR / "urls.txt"
-OUTPUT_DIR = BASE_DIR / "NotebookLM_Sources"
+OUTPUT_DIR = Path(r"G:\Mon Drive\NotebookLM\NotebookLM_Sources")
 LOG_FILE = BASE_DIR / "processed_urls.log"
 
 # --- CRAWLER SETTINGS ---
