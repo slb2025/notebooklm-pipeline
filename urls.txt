@@ -1,0 +1,8 @@
+https://research.google/blog/
+https://openai.com/news/
+https://ai.meta.com/blog/
+https://www.anthropic.com/news
+https://aws.amazon.com/blogs/machine-learning/
+https://blogs.microsoft.com/ai/
+https://blogs.nvidia.com/blog/category/deep-learning/
+https://huggingface.co/blog
